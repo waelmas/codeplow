@@ -1,0 +1,21 @@
+{
+  "name": "codeplow",
+  "interface": {
+    "displayName": "codeplow - by Wael Masri"
+  },
+  "owner": {
+    "name": "Wael Masri"
+  },
+  "plugins": [
+    {
+      "name": "obsidian-kb",
+      "source": {
+        "source": "local",
+        "path": "./obsidian-kb"
+      },
+      "description": "Persistent project memory for AI agents + documentation auditor - evidence-based detection of doc rot, powered by Obsidian vaults",
+      "version": "0.1.0",
+      "category": "Productivity"
+    }
+  ]
+}

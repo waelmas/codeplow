@@ -1,0 +1,20 @@
+{
+  "name": "codeplow",
+  "owner": {
+    "name": "Wael Masri",
+    "email": "wm@waelmas.com"
+  },
+  "metadata": {
+    "description": "A growing marketplace of plugins, skills, and hooks for AI coding agents. Native on Claude Code, Cursor, and Codex. First plugin: persistent project memory + documentation auditor. More coming."
+  },
+  "plugins": [
+    {
+      "name": "obsidian-kb",
+      "source": "./obsidian-kb",
+      "description": "Persistent project memory for AI agents + documentation auditor - evidence-based detection of doc rot, powered by Obsidian vaults",
+      "version": "0.1.0",
+      "category": "productivity",
+      "keywords": ["obsidian", "knowledge-base", "session-handoff", "project-memory", "documentation-audit", "doc-rot"]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "obsidian-kb",
+  "description": "Persistent project memory for AI agents + documentation auditor - evidence-based detection of doc rot, powered by Obsidian vaults",
+  "version": "0.1.0",
+  "author": {
+    "name": "Wael Masri"
+  },
+  "homepage": "https://waelmas.com",
+  "repository": "https://github.com/waelmas/codeplow",
+  "license": "MIT",
+  "keywords": ["obsidian", "knowledge-base", "session-handoff", "project-memory", "documentation-audit", "doc-rot"],
+  "skills": "./skills/"
+}
