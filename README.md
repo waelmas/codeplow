@@ -6,59 +6,25 @@ Built by [Wael Masri](https://waelmas.com).
 
 ---
 
-## TL;DR
+## What's in the marketplace
 
-- Today, one plugin: [`obsidian-kb`](obsidian-kb/) - a real [Obsidian](https://obsidian.md) vault as persistent, per-project memory for your AI coding agent.
-- Solves **context rot** between sessions (`/kb-offboard` writes a handoff, `/kb-onboard` reads it) and **doc rot** inside the repo (`/kb-audit` flags stale markdown with `file:line` evidence).
-- Not a vector DB, not a CLAUDE.md replacement - plain markdown on disk, user-owned, committable alongside your code.
-- Add the marketplace once; future plugins land there automatically.
+Today, one plugin. More coming — they'll land as siblings in this repo.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/waelmas/codeplow/main/scripts/install.sh | bash
-```
+### [`obsidian-kb`](obsidian-kb/) — persistent, per-project memory for your AI coding agent
 
----
+A real [Obsidian](https://obsidian.md) vault per project, sitting inside the project folder by default (committable), holding structured knowledge your agent can read between sessions.
 
-## Why this exists
-
-**Context rot.** Long sessions drift - decisions made at token 2,000 get lost by token 50,000. Starting a new session resets everything, including the decisions. The fix isn't stuffing more into context. It's externalizing the thread so each new session starts fresh *and* briefed.
-
-**Doc rot.** Every codebase accumulates stale markdown: a README that says `npm run start`, an `ARCHITECTURE.md` describing a service split three refactors ago. AI-written projects are especially prone - the agent generates docs that match the commit, nothing updates them later, the next session reads them as truth.
-
-`obsidian-kb` attacks both with one pattern: a real Obsidian vault holding structured project memory, audited against live code with `file:line` citations, plus explicit session handoffs.
-
----
-
-## Commands
-
-| Command | What it does | When |
+| Capability | Command | What happens |
 |---|---|---|
-| `/kb-init` | Scaffold a vault, analyze the codebase via parallel subagents into structured docs, run a Documentation Audit on existing markdown with `file:line` evidence. | Day 1 on a project. |
-| `/kb-audit` | Re-run just the drift check on existing markdown. | Quarterly, after refactors. |
-| `/kb-onboard` | Agent reads the latest handoff, picks up the thread. | Start of each session. |
-| `/kb-offboard` | Agent writes an adaptive handoff (TL;DR, decisions, files changed, gotchas) and updates the KB. | End of each session. |
-| `/kb-graph` | Opens the vault in Obsidian's graph view. | When you want to see connections. |
-| `/kb-scaffold` | Empty structure only - populate by hand. | If you don't want codebase analysis. |
+| Build a **project knowledge base** from your codebase | `/kb-init` | Parallel subagents write Architecture / Tech Stack / Patterns / etc. notes into the vault. 3–6 minutes. |
+| **Keep the KB aligned** with recent changes | `/kb-update` | Reviews git activity + session context, surgically refreshes stale KB notes with `file:line` evidence, flags new concepts as candidates. |
+| **Audit your project docs** for drift | `/kb-init` or `/kb-audit` | Flags every stale claim in the project's own markdown (README.md, ARCHITECTURE.md, etc.) with `file:line` evidence. |
+| **Session handoff** — beat context rot | `/kb-offboard` *(alias `/kb-handoff`)* | Writes an adaptive handoff into the vault (TL;DR, decisions, files changed, gotchas, next steps), linked from the index and wiki-linked to related KB notes. |
+| **Session onboarding** — pick up in a new session | `/kb-onboard` | New agent reads the latest handoff and the linked KB notes before starting work. |
+| **Visual knowledge map** | `/kb-graph` | Opens the vault in Obsidian's graph view. |
+| Empty scaffold (hand-populated KB) | `/kb-scaffold` | Vault structure only, no codebase analysis. |
 
-Smart chaining: run `/kb-graph` on an uninitialized project and the agent offers to chain through `/kb-init` first.
-
----
-
-## How it compares
-
-| | obsidian-kb | [Cline Memory Bank](https://docs.cline.bot/prompting/cline-memory-bank) | [claude-mem](https://github.com/thedotmack/claude-mem) | [Mem0](https://mem0.ai) / [Zep](https://getzep.com) | CLAUDE.md / AGENTS.md |
-|---|---|---|---|---|---|
-| **Storage** | Markdown in Obsidian vault | Plain markdown | SQLite + Chroma (vector) | Proprietary graph + vector | Single markdown file |
-| **User owns the data?** | Yes - portable `.md` | Yes | Local, but opaque | OSS self-host or cloud | Yes |
-| **Audit with `file:line` citations** | **Yes** | No | No | No | No |
-| **Cross-platform** (Claude Code / Cursor / Codex) | **Yes, one plugin** | Cline only | Claude-primary | SDK into any app | Tool-specific file |
-| **Session continuity** | Explicit onboard/offboard | Implicit ("read all on reset") | Auto-capture, opaque | Retrieval on query | None |
-| **Scope** | Per-project vault | Per-project folder | Global + per-project | Per-user / per-app | Per-project file |
-
-- **Closest sibling - Cline Memory Bank.** Also markdown, also per-project. Differs: Cline-only, fixed schema, no audit, no graph, no explicit handoff loop.
-- **Different category - claude-mem / Mem0 / Zep / Supermemory.** Vector retrieval over chat history (*"what did we discuss?"*). obsidian-kb curates project docs (*"what does this project look like, and where were we?"*). Compose them if you want both.
-- **Different scope - CLAUDE.md / AGENTS.md / Cursor Rules.** Short bootstrap files. Point them at the vault for depth.
-- **Opposite direction - [Smart Connections](https://github.com/brianpetro/obsidian-smart-connections).** Brings AI *into* Obsidian. obsidian-kb brings Obsidian *into* your AI coding agent.
+The vault is plain markdown on disk — committable alongside your code, editable by hand, grep-able, zero lock-in. Not a vector DB, not a CLAUDE.md replacement.
 
 ---
 
@@ -123,11 +89,21 @@ After install, point your AI agent at a real project and:
 
 2. **Open `Research/Documentation Audit.md`.** Every stale claim in your project's docs, with `file:line` evidence. If your project has AI-generated docs, expect surprises. Tell the agent *"fix the stale claims in README.md"* — it works from the evidence, not vibes.
 
-3. **Run `/kb-graph`.** Opens the vault in Obsidian's graph view; click through the wiki-linked notes to see how your project is now structured as a knowledge map.
+3. **Run `/kb-graph`.** Opens the vault in Obsidian's graph view; click through the wiki-linked notes to see your project as a knowledge map.
 
-4. **Try the handoff loop.** At session end, run `/kb-offboard` — agent writes an adaptive handoff. Start a fresh session and run `/kb-onboard` — the new agent reads the handoff and picks up the thread with clean context. **This is the loop most users run daily.**
+4. **Try the daily loop.** At session end: `/kb-update` to refresh KB notes with what changed, then `/kb-offboard` (or `/kb-handoff`) to write the handoff. Start a fresh session and `/kb-onboard` — new agent reads the handoff plus the updated KB, picks up with clean context. **This is the loop most users run daily.**
 
-From there: `/kb-offboard` at session end, `/kb-onboard` at session start, `/kb-audit` whenever you want a fresh drift check.
+From there: `/kb-update` + `/kb-offboard` at session end, `/kb-onboard` at session start, `/kb-audit` whenever you want a fresh drift check on project docs.
+
+---
+
+## Why this exists
+
+**Context rot.** Long sessions drift — decisions made at token 2,000 get lost by token 50,000. Starting a new session resets everything, including the decisions. The fix isn't stuffing more into context. It's externalizing the thread so each new session starts fresh *and* briefed.
+
+**Doc rot.** Every codebase accumulates stale markdown: a README that says `npm run start`, an `ARCHITECTURE.md` describing a service split three refactors ago. AI-written projects are especially prone — the agent generates docs that match the commit, nothing updates them later, the next session reads them as truth.
+
+`obsidian-kb` attacks both with one pattern: a real Obsidian vault holding structured project memory, kept aligned with live code via `/kb-update`, audited with `file:line` citations, plus explicit session handoffs that live inside the same vault.
 
 ---
 
@@ -135,7 +111,7 @@ From there: `/kb-offboard` at session end, `/kb-onboard` at session start, `/kb-
 
 The feature nothing else in this category ships.
 
-When `/kb-init` runs, one subagent walks every existing `.md` file in the project and cross-checks concrete claims against the code. The result lives in `Research/Documentation Audit.md`:
+When `/kb-init` runs (or `/kb-audit` on its own), one subagent walks every existing `.md` file in the project and cross-checks concrete claims against the code. The result lives in `Research/Documentation Audit.md`:
 
 ```markdown
 ## Summary
@@ -155,30 +131,48 @@ When `/kb-init` runs, one subagent walks every existing `.md` file in the projec
 
 You then tell the agent *"fix the stale README commands"* or *"delete the outdated architecture doc"* and you're back in control of your docs in minutes.
 
-**Hard rule:** no flag without a concrete `file:line` reference. Every finding is independently verifiable - no vibes, no speculation.
+**Hard rule:** no flag without a concrete `file:line` reference. Every finding is independently verifiable — no vibes, no speculation.
 
 ---
 
 ## Where the vault lives
 
-Default: **inside the project** (e.g. `./myproject-kb/` alongside `src/`). Two reasons - scoping (one KB per project) and commit-friendliness (versioned markdown, your whole team onboards on the same KB).
+Default: **inside the project** (e.g. `./myproject-kb/` alongside `src/`). Two reasons — scoping (one KB per project) and commit-friendliness (versioned markdown, your whole team onboards on the same KB).
 
-Prefer it private per-developer? `echo "myproject-kb/" >> .gitignore`. Zero lock-in either way - it's markdown on disk.
+Prefer it private per-developer? `echo "myproject-kb/" >> .gitignore`. Zero lock-in either way — it's markdown on disk.
+
+---
+
+## How it compares
+
+| | obsidian-kb | [Cline Memory Bank](https://docs.cline.bot/prompting/cline-memory-bank) | [claude-mem](https://github.com/thedotmack/claude-mem) | [Mem0](https://mem0.ai) / [Zep](https://getzep.com) | CLAUDE.md / AGENTS.md |
+|---|---|---|---|---|---|
+| **Storage** | Markdown in Obsidian vault | Plain markdown | SQLite + Chroma (vector) | Proprietary graph + vector | Single markdown file |
+| **User owns the data?** | Yes — portable `.md` | Yes | Local, but opaque | OSS self-host or cloud | Yes |
+| **Audit with `file:line` citations** | **Yes** | No | No | No | No |
+| **Cross-platform** (Claude Code / Cursor / Codex) | **Yes, one plugin** | Cline only | Claude-primary | SDK into any app | Tool-specific file |
+| **Session continuity** | Explicit onboard/offboard | Implicit ("read all on reset") | Auto-capture, opaque | Retrieval on query | None |
+| **Scope** | Per-project vault | Per-project folder | Global + per-project | Per-user / per-app | Per-project file |
+
+- **Closest sibling — Cline Memory Bank.** Also markdown, also per-project. Differs: Cline-only, fixed schema, no audit, no graph, no explicit handoff loop.
+- **Different category — claude-mem / Mem0 / Zep / Supermemory.** Vector retrieval over chat history (*"what did we discuss?"*). obsidian-kb curates project docs (*"what does this project look like, and where were we?"*). Compose them if you want both.
+- **Different scope — CLAUDE.md / AGENTS.md / Cursor Rules.** Short bootstrap files. Point them at the vault for depth.
+- **Opposite direction — [Smart Connections](https://github.com/brianpetro/obsidian-smart-connections).** Brings AI *into* Obsidian. obsidian-kb brings Obsidian *into* your AI coding agent.
 
 ---
 
 ## Honest trade-offs
 
-- **No automatic capture.** Offboards are explicit. Design trade-off: explicit writes are curated writes.
-- **No built-in semantic search.** Agents navigate by filenames and wiki-links. For a large vault, layer [Smart Connections](https://github.com/brianpetro/obsidian-smart-connections) on top - it runs against the same vault.
+- **No automatic capture.** Offboards and KB updates are explicit. Design trade-off: explicit writes are curated writes.
+- **No built-in semantic search.** Agents navigate by filenames and wiki-links. For a large vault, layer [Smart Connections](https://github.com/brianpetro/obsidian-smart-connections) on top — it runs against the same vault.
 - **No cross-project user memory.** Per-project by design. Pair with CLAUDE.md or Mem0 for global.
-- **Graph view needs Obsidian installed.** The vault is markdown either way - only the graph differentiator requires Obsidian.
+- **Graph view needs Obsidian installed.** The vault is markdown either way — only the graph differentiator requires Obsidian.
 
 ---
 
 ## About, Contributing, Uninstall
 
-Built by [Wael Masri](https://waelmas.com) - more AI coding tools at [github.com/waelmas](https://github.com/waelmas).
+Built by [Wael Masri](https://waelmas.com) — more AI coding tools at [github.com/waelmas](https://github.com/waelmas).
 
 Flat layout: each plugin is a top-level folder at repo root (following [ComposioHQ/awesome-claude-plugins](https://github.com/ComposioHQ/awesome-claude-plugins)). See [AGENTS.md](AGENTS.md) for repo conventions. Open an issue to propose a new plugin.
 

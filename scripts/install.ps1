@@ -120,7 +120,7 @@ if (Get-Command codex -ErrorAction SilentlyContinue) {
       "name": "$PluginName",
       "source": { "source": "local", "path": "$pluginPath" },
       "description": "Project knowledge base lifecycle via Obsidian vaults",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "category": "Productivity"
     }
   ]

@@ -128,7 +128,7 @@ cat > "$HOME/.agents/plugins/marketplace.json" <<EOF
       "name": "obsidian-kb",
       "source": { "source": "local", "path": "$HOME/.codeplow/obsidian-kb" },
       "description": "Persistent project memory for AI agents + documentation auditor - powered by Obsidian vaults",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "category": "Productivity"
     }
   ]
@@ -154,10 +154,11 @@ Once installation is complete, tell the user:
 2. Any required restart / reload actions they need to take
 3. The commands they can now use:
    - `/kb-init` - **main command.** Initialize the project knowledge base: scaffold vault + analyze codebase + populate with rich docs + audit existing markdown for stale claims
-   - `/kb-audit` - re-runnable documentation freshness audit (quarterly doc refreshes, pre-rewrite checks)
+   - `/kb-update` - refresh KB notes after code changes; surgical edits with file:line evidence, flags new concepts as candidates
+   - `/kb-audit` - re-runnable audit of the project's own markdown (README, ARCHITECTURE, etc.) against current code
    - `/kb-scaffold` - just create an empty vault structure (use when you want to manage content manually)
    - `/kb-onboard` - brief the agent on what happened last session
-   - `/kb-offboard` - write an adaptive session handoff
+   - `/kb-offboard` (alias `/kb-handoff`) - write an adaptive session handoff into the vault
    - `/kb-graph` - open the vault graph view in Obsidian
 
 Suggest they start with `/kb-init` on a project they care about.

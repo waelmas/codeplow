@@ -116,7 +116,7 @@ install_codex() {
       "name": "$PLUGIN_NAME",
       "source": { "source": "local", "path": "$CACHE_DIR/$PLUGIN_NAME" },
       "description": "Project knowledge base lifecycle via Obsidian vaults",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "category": "Productivity"
     }
   ]
