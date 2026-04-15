@@ -108,7 +108,7 @@ obsidian-kb puts the agent's memory in a vault **you can open**:
 ## How `/kb-init` works
 
 1. **Preflight** — verifies Obsidian is installed and its CLI is enabled, resolves project name.
-2. **Vault creation** — sibling folder to your project (e.g. `./myproject-kb/`) with standard directories: `Architecture/`, `Research/`, `Sessions/`, `Tech/`, `Patterns/`.
+2. **Vault creation** — a folder inside your project (default: `./MyProject KB/`, title-cased from the repo name) with three directories: `Architecture/`, `Research/`, `Sessions/`.
 3. **Parallel subagents** — each explores one slice of the codebase and writes a structured note.
 4. **Audit subagent** — runs in parallel, cross-checks every existing `.md` file against live code.
 5. **Index** — a `README.md` at the vault root wiki-links every note.

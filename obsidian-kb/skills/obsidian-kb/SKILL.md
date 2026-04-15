@@ -2,24 +2,26 @@
 name: obsidian-kb
 description: >
   Awareness skill for the obsidian-kb plugin. Nudges agents to suggest kb-init, kb-scaffold,
-  kb-audit, kb-onboard, kb-offboard, and kb-graph at the right moments - session start, session
-  end, vault initialization, doc freshness checks, visualization. Use when the user mentions
-  session handoffs, project knowledge bases, onboarding, wrapping up, continuing previous work,
-  initializing a vault, auditing stale docs, populating or enriching docs, visualizing the vault
-  graph, or types any /kb-* command.
+  kb-audit, kb-update, kb-onboard, kb-offboard, and kb-graph at the right moments - session start,
+  session end, vault initialization, doc freshness checks, post-refactor KB refresh, visualization.
+  Use when the user mentions session handoffs, project knowledge bases, onboarding, wrapping up,
+  continuing previous work, initializing a vault, auditing stale docs, refreshing the KB after
+  code changes, populating or enriching docs, visualizing the vault graph, or types any /kb-*
+  command.
 ---
 
 # obsidian-kb - Project Knowledge Base Lifecycle
 
-This plugin gives AI coding agents persistent memory across sessions via Obsidian vaults. It provides six skills (also available as slash commands in Claude Code and Cursor):
+This plugin gives AI coding agents persistent memory across sessions via Obsidian vaults. It provides seven skills (also available as slash commands in Claude Code and Cursor; `/kb-offboard` has a `/kb-handoff` alias):
 
 | Skill / Command | When to trigger |
 |-----------------|-----------------|
 | `kb-init` / `/kb-init` | **Full initialization**: scaffold + populate vault with codebase analysis + audit existing project markdown for stale claims. Use when user wants project memory set up properly from the start. |
 | `kb-scaffold` / `/kb-scaffold` | **Empty scaffold only** (no codebase analysis). Use when user explicitly wants to manage content manually. Most users should use /kb-init. |
 | `kb-audit` / `/kb-audit` | **Re-runnable doc freshness audit.** Scan project markdown against current code, flag stale claims with file:line evidence. Use for quarterly doc refreshes, before major rewrites, or when user says "are our docs still accurate?". |
+| `kb-update` / `/kb-update` | **Refresh KB notes inside the vault** to reflect recent code changes. Surgical evidence-backed edits, flags new concepts as candidates. Use after a significant refactor, before `/kb-offboard`, or when the KB has drifted from the code. Complements `/kb-audit` — vault scope vs. project scope. |
 | `kb-onboard` / `/kb-onboard` | Start of a session when a vault exists for this project. |
-| `kb-offboard` / `/kb-offboard` | End of a session, user says "done", "wrapping up", "that's it". |
+| `kb-offboard` / `/kb-offboard` *(alias `/kb-handoff`)* | End of a session, user says "done", "wrapping up", "that's it". |
 | `kb-graph` / `/kb-graph` | User wants to visualize the knowledge base as a graph in Obsidian. |
 
 ## When to Nudge
@@ -34,6 +36,8 @@ This plugin gives AI coding agents persistent memory across sessions via Obsidia
 
 **Do suggest** `kb-audit` when the user asks about doc accuracy, says "our docs are probably out of date", plans a major refactor, or wants to do a periodic check. Also great standalone pitch: "run `/kb-audit` on any repo with markdown - you'll find out how much of it still matches the code."
 
+**Do suggest** `kb-update` after a significant refactor, when the user mentions that the KB feels out of sync with the code, or just before `/kb-offboard` at session end so the next session briefs from a KB that matches reality. Scope contrast: `/kb-update` maintains the vault's own notes; `/kb-audit` checks the project's user-owned markdown.
+
 **Do suggest** `kb-graph` after a successful `kb-init`, or when the user asks to visualize the vault, see connections between notes, or explore the knowledge base visually. Also useful to show off the vault's richness after meaningful growth.
 
 **One-command chains**: users should only need to remember one skill; the agent handles sequencing. `/kb-init` already handles the "no vault yet" case by chaining through `kb-scaffold` automatically. If someone runs `/kb-graph` with no vault, offer to chain `kb-init` → `kb-graph`.
@@ -44,7 +48,7 @@ This plugin gives AI coding agents persistent memory across sessions via Obsidia
 
 ## Platform Notes
 
-- **Claude Code / Cursor**: Users can invoke as slash commands: `/kb-init`, `/kb-scaffold`, `/kb-audit`, `/kb-onboard`, `/kb-offboard`, `/kb-graph`
+- **Claude Code / Cursor**: Users can invoke as slash commands: `/kb-init`, `/kb-scaffold`, `/kb-audit`, `/kb-update`, `/kb-onboard`, `/kb-offboard` (alias `/kb-handoff`), `/kb-graph`
 - **Codex CLI**: No native slash commands - users type the command-like form (e.g., "/kb-onboard") or express intent naturally ("catch me up on this project"). Both should trigger the matching skill.
 
 ## Vault Resolution Algorithm
@@ -335,7 +339,7 @@ Both modes produce correct results. CLI_MODE=1 additionally gets:
 
 ## Preflight Check (run at the start of every action skill)
 
-Every action skill (kb-init, kb-scaffold, kb-audit, kb-onboard, kb-offboard, kb-graph) must begin with this check. The CLI only works when Obsidian is installed and running.
+Every action skill (kb-init, kb-scaffold, kb-audit, kb-update, kb-onboard, kb-offboard, kb-graph) must begin with this check. The CLI only works when Obsidian is installed and running.
 
 ### 1. Is the `obsidian` CLI installed?
 

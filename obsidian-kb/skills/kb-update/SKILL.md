@@ -15,7 +15,7 @@ description: >
 Keep the project KB aligned with reality as the code evolves. Review recent git activity and session context, surgically update stale KB notes, flag new concepts for documentation.
 
 **Scope distinction:**
-- **`kb-update` (this skill)** — edits notes *inside the vault* (Architecture/, Tech/, Patterns/, etc.) so the agent's memory matches the current code.
+- **`kb-update` (this skill)** — edits notes *inside the vault* (under `Architecture/` and `Research/`, excluding `Sessions/` handoffs and `Research/Documentation Audit.md`) so the agent's memory matches the current code.
 - **`kb-audit`** — checks the *project's* user-owned markdown (README.md, ARCHITECTURE.md, etc.) and produces a stand-alone audit report.
 
 Both enforce the same hard rule: no edit or flag without `file:line` evidence.
@@ -169,7 +169,8 @@ Candidates for new notes (awaiting your approval):
 - `Architecture/Refresh Token Flow` - new concept introduced by commit abc123; no existing note
   covers token lifecycle. Would document: rotation policy, revocation, storage.
 
-- `Tech/Redis Caching Layer` - new dependency (package.json:58), no existing Tech/ note.
+- `Research/Redis Caching Layer` - new dependency (package.json:58); worth a standalone note
+  describing eviction policy and hit-rate expectations.
 ```
 
 The user can approve or redirect. Do not write these without approval.
@@ -184,15 +185,15 @@ Updated N KB notes based on recent changes:
 - Architecture/System Overview.md - auth section refreshed
   (evidence: src/middleware/auth.ts replaces src/services/auth/)
 
-- Tech/Stack.md - Postgres version 15 → 16
+- Architecture/Tech Stack.md - Postgres version 15 → 16
   (evidence: package.json:42, docker-compose.yml:8)
 
-- Patterns/Error Handling.md - added reference to new RetryMiddleware
+- Research/Error Handling.md - added reference to new RetryMiddleware
   (evidence: src/middleware/retry.ts:1-47)
 
 Candidates for new notes (awaiting your approval):
 - Architecture/Refresh Token Flow
-- Tech/Redis Caching Layer
+- Research/Redis Caching Layer
 
 Unchanged: K notes - no drift detected against the reviewed window.
 

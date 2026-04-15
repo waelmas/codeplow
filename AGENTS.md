@@ -40,6 +40,7 @@ codeplow/
 │   ├── commands/                         # Thin slash-command wrappers (Claude Code + Cursor)
 │   ├── skills/                           # Source of truth - all platforms read SKILL.md
 │   ├── scripts/                          # Plugin-bundled scripts (e.g. register-vault.sh)
+│   ├── CHANGELOG.md                      # Plugin changelog (Keep a Changelog format)
 │   └── README.md                         # Plugin-level storefront
 │
 ├── <future-plugin>/                      # Future plugins land as siblings at root
