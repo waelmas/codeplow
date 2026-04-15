@@ -99,9 +99,63 @@ Handoffs are short when sessions were small, rich when they weren't. Links back 
 
 ---
 
-## Install & requirements
+## Prerequisites
 
-See the [codeplow install guide](https://github.com/waelmas/codeplow#install). Requirement worth calling out: [Obsidian](https://obsidian.md) v1.12+ with its **Command Line Interface** enabled (Settings → General → bottom → toggle **Command Line Interface** ON - it's off by default). Preflight walks you through it.
+obsidian-kb needs two things:
+
+1. **Obsidian desktop app** (v1.12+) — `brew install --cask obsidian` / `winget install Obsidian.Obsidian` / download from [obsidian.md](https://obsidian.md/download).
+2. **Obsidian's CLI enabled.** The CLI ships with the app but is **OFF by default** — open Obsidian → **Settings → General → scroll to the bottom → toggle "Command Line Interface" ON**, then close and reopen your terminal.
+
+Both are required. Preflight walks you through enabling the CLI if you forget, but knowing upfront saves a round-trip.
+
+---
+
+## Install
+
+One-line shell scripts (detects your AI tools and installs for each):
+
+```bash
+# macOS / Linux / WSL
+curl -fsSL https://raw.githubusercontent.com/waelmas/codeplow/main/scripts/install.sh | bash
+
+# Windows PowerShell
+iwr -useb https://raw.githubusercontent.com/waelmas/codeplow/main/scripts/install.ps1 | iex
+```
+
+Or per platform:
+
+**Claude Code**
+```bash
+claude plugin marketplace add waelmas/codeplow
+claude plugin install obsidian-kb@codeplow
+```
+
+**Cursor**
+```bash
+git clone https://github.com/waelmas/codeplow ~/codeplow
+mkdir -p ~/.cursor/plugins/local
+ln -s ~/codeplow/obsidian-kb ~/.cursor/plugins/local/obsidian-kb
+# Then: Developer: Reload Window in Cursor
+```
+
+**Codex CLI**
+```bash
+git clone https://github.com/waelmas/codeplow ~/codeplow
+mkdir -p ~/.agents/plugins
+cp ~/codeplow/.agents/plugins/marketplace.json ~/.agents/plugins/marketplace.json
+# Then open /plugins in Codex
+```
+
+---
+
+## Getting started — your first 5 minutes
+
+Point your AI agent at a real project and:
+
+1. **`/kb-init`.** Scaffolds a vault alongside your project, analyzes the codebase via parallel subagents into structured notes, runs the Documentation Audit in parallel. 3–6 minutes.
+2. **Open `Research/Documentation Audit.md`.** Every stale doc claim with `file:line` evidence. Tell the agent *"fix the stale claims"* — it works from evidence, not vibes.
+3. **`/kb-graph`.** See your project as a visual knowledge map in Obsidian.
+4. **The handoff loop.** End of session: `/kb-offboard`. New session: `/kb-onboard`. Fresh context, preserved thread. This is the loop you'll run daily.
 
 ---
 

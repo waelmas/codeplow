@@ -62,13 +62,24 @@ Smart chaining: run `/kb-graph` on an uninitialized project and the agent offers
 
 ---
 
+## Prerequisites
+
+`obsidian-kb` needs two things:
+
+1. **Obsidian desktop app** (v1.12+) — `brew install --cask obsidian` / `winget install Obsidian.Obsidian` / download from [obsidian.md](https://obsidian.md/download).
+2. **Obsidian's CLI enabled.** The CLI ships with the app but is **OFF by default.** Open Obsidian → **Settings → General → scroll to the bottom → toggle "Command Line Interface" ON**, then close and reopen your terminal so `obsidian` lands on PATH.
+
+Both are required. The plugin preflight tells you which is missing and walks you through enabling the CLI, but knowing upfront saves a round-trip.
+
+---
+
 ## Install
 
-Easiest - ask your agent:
+Easiest — ask your agent:
 
 > Install codeplow for me by following https://raw.githubusercontent.com/waelmas/codeplow/main/INSTALL.md
 
-Or one shell line:
+One-line shell scripts (detects which AI tools you have and installs for each):
 
 ```bash
 # macOS / Linux / WSL
@@ -78,8 +89,7 @@ curl -fsSL https://raw.githubusercontent.com/waelmas/codeplow/main/scripts/insta
 iwr -useb https://raw.githubusercontent.com/waelmas/codeplow/main/scripts/install.ps1 | iex
 ```
 
-<details>
-<summary><b>Platform-specific manual install</b></summary>
+### Or install manually per platform
 
 **Claude Code**
 ```bash
@@ -102,9 +112,22 @@ mkdir -p ~/.agents/plugins
 cp ~/codeplow/.agents/plugins/marketplace.json ~/.agents/plugins/marketplace.json
 # Then open /plugins in Codex
 ```
-</details>
 
-**Prerequisite:** [Obsidian](https://obsidian.md) v1.12+ with its CLI enabled (Settings → General → scroll to bottom → toggle **Command Line Interface** ON). The plugin preflight walks you through it if it's missing.
+---
+
+## Getting started — your first 5 minutes
+
+After install, point your AI agent at a real project and:
+
+1. **Run `/kb-init`.** Agent scaffolds a vault (e.g. `./myproject-kb/`), dispatches parallel subagents to write Architecture / Tech Stack / Patterns notes, and runs a Documentation Audit against your existing markdown. 3–6 minutes end to end.
+
+2. **Open `Research/Documentation Audit.md`.** Every stale claim in your project's docs, with `file:line` evidence. If your project has AI-generated docs, expect surprises. Tell the agent *"fix the stale claims in README.md"* — it works from the evidence, not vibes.
+
+3. **Run `/kb-graph`.** Opens the vault in Obsidian's graph view; click through the wiki-linked notes to see how your project is now structured as a knowledge map.
+
+4. **Try the handoff loop.** At session end, run `/kb-offboard` — agent writes an adaptive handoff. Start a fresh session and run `/kb-onboard` — the new agent reads the handoff and picks up the thread with clean context. **This is the loop most users run daily.**
+
+From there: `/kb-offboard` at session end, `/kb-onboard` at session start, `/kb-audit` whenever you want a fresh drift check.
 
 ---
 
