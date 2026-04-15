@@ -54,6 +54,28 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
     $RemovedAny = $true
 }
 
+# --- GitHub Copilot CLI -----------------------------------------------------
+if (Get-Command copilot -ErrorAction SilentlyContinue) {
+    Write-Heading '→ GitHub Copilot CLI'
+    $plugins = (copilot plugin list 2>&1 | Out-String)
+    if ($plugins -match "$PluginName@$MarketplaceName") {
+        Write-Info "Uninstalling plugin '$PluginName@$MarketplaceName'..."
+        copilot plugin uninstall "$PluginName@$MarketplaceName" *> $null
+        Write-OK 'Plugin uninstalled.'
+    } else {
+        Write-Info "Plugin '$PluginName@$MarketplaceName' was not installed - skipping."
+    }
+    $marketplaces = (copilot plugin marketplace list 2>&1 | Out-String)
+    if ($marketplaces -match [regex]::Escape($MarketplaceName)) {
+        Write-Info "Removing marketplace '$MarketplaceName'..."
+        copilot plugin marketplace remove $MarketplaceName *> $null
+        Write-OK 'Marketplace removed.'
+    } else {
+        Write-Info "Marketplace '$MarketplaceName' was not registered - skipping."
+    }
+    $RemovedAny = $true
+}
+
 # --- Cursor -----------------------------------------------------------------
 $CursorExe = Join-Path $env:LOCALAPPDATA 'Programs\cursor\Cursor.exe'
 if ((Get-Command cursor -ErrorAction SilentlyContinue) -or (Test-Path $CursorExe)) {

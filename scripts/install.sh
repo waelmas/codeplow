@@ -67,6 +67,35 @@ install_claude_code() {
   green "✓ Claude Code install complete - restart Claude Code to load."
 }
 
+# --- GitHub Copilot CLI -------------------------------------------------------
+# Copilot CLI reuses Claude Code's plugin format — same marketplace.json and
+# plugin.json files, same command shape. No separate manifests needed.
+install_copilot() {
+  if ! command -v copilot >/dev/null 2>&1; then
+    return 1
+  fi
+  bold "→ GitHub Copilot CLI detected"
+  if copilot plugin marketplace list 2>/dev/null | grep -q "$MARKETPLACE_NAME"; then
+    echo "Marketplace '$MARKETPLACE_NAME' already registered."
+  else
+    echo "Registering marketplace..."
+    copilot plugin marketplace add "$REPO_OWNER/$REPO_NAME" || {
+      red "Failed to add marketplace (check: does your Copilot CLI build support 'plugin marketplace add'?)"
+      return 1
+    }
+  fi
+  if copilot plugin list 2>/dev/null | grep -q "$PLUGIN_NAME@$MARKETPLACE_NAME"; then
+    echo "Plugin '$PLUGIN_NAME' already installed - updating..."
+    copilot plugin update "$PLUGIN_NAME@$MARKETPLACE_NAME" 2>/dev/null || true
+  else
+    echo "Installing plugin '$PLUGIN_NAME@$MARKETPLACE_NAME'..."
+    copilot plugin install "$PLUGIN_NAME@$MARKETPLACE_NAME" || {
+      red "Failed to install plugin"; return 1;
+    }
+  fi
+  green "✓ Copilot CLI install complete - start a new Copilot session to load."
+}
+
 # --- Cursor -------------------------------------------------------------------
 install_cursor() {
   if ! command -v cursor >/dev/null 2>&1 && [ ! -d "/Applications/Cursor.app" ]; then
@@ -116,7 +145,7 @@ install_codex() {
       "name": "$PLUGIN_NAME",
       "source": { "source": "local", "path": "$CACHE_DIR/$PLUGIN_NAME" },
       "description": "Project knowledge base lifecycle via Obsidian vaults",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "category": "Productivity"
     }
   ]
@@ -132,13 +161,15 @@ INSTALLED_ANY=0
 
 if install_claude_code; then INSTALLED_ANY=1; fi
 echo ""
+if install_copilot; then INSTALLED_ANY=1; fi
+echo ""
 if install_cursor; then INSTALLED_ANY=1; fi
 echo ""
 if install_codex; then INSTALLED_ANY=1; fi
 echo ""
 
 if [ "$INSTALLED_ANY" -eq 0 ]; then
-  yellow "No supported AI coding tool detected (claude, cursor, or codex)."
+  yellow "No supported AI coding tool detected (claude, copilot, cursor, or codex)."
   yellow "Install one of them first, then re-run this script."
   exit 1
 fi

@@ -1,6 +1,6 @@
 # codeplow
 
-**Plugins for AI coding agents that fight context rot, doc rot, and forgotten decisions.** Native on **Claude Code**, **Cursor**, and **Codex CLI**.
+**Plugins for AI coding agents that fight context rot, doc rot, and forgotten decisions.** Native on **Claude Code**, **GitHub Copilot CLI**, **Cursor**, and **Codex CLI**.
 
 Built by [Wael Masri](https://waelmas.com).
 
@@ -41,21 +41,34 @@ Both are required. The plugin preflight tells you which is missing and walks you
 
 ## Install
 
-Easiest — ask your agent:
+Installation has **two steps** that live in two different places. Keep them straight or you'll paste the wrong command into the wrong place — which is the most common source of confusion.
+
+> **1. Install the plugin — runs in your regular terminal** (bash / zsh / PowerShell).
+> **2. Use the plugin — runs inside your AI agent's chat or session**, not in your terminal. Commands like `/kb-init` are typed to the agent. They start with `/` because they're slash commands the agent recognizes; your shell doesn't.
+
+---
+
+### 1. Install — in your terminal
+
+Easiest — ask your agent to do it for you (from its own chat):
 
 > Install codeplow for me by following https://raw.githubusercontent.com/waelmas/codeplow/main/INSTALL.md
 
-One-line shell scripts (detects which AI tools you have and installs for each):
+Or paste the one-liner into your terminal. It detects which AI tools you have installed and registers codeplow for each:
 
 ```bash
-# macOS / Linux / WSL
+# macOS / Linux / WSL — paste into your terminal
 curl -fsSL https://raw.githubusercontent.com/waelmas/codeplow/main/scripts/install.sh | bash
+```
 
-# Windows PowerShell
+```powershell
+# Windows PowerShell — paste into a PowerShell window
 iwr -useb https://raw.githubusercontent.com/waelmas/codeplow/main/scripts/install.ps1 | iex
 ```
 
-### Or install manually per platform
+#### Or install manually per platform — also terminal
+
+All four snippets run in your regular terminal. They register codeplow with each tool's plugin system — they don't start the agent.
 
 **Claude Code**
 ```bash
@@ -63,12 +76,18 @@ claude plugin marketplace add waelmas/codeplow
 claude plugin install obsidian-kb@codeplow
 ```
 
+**GitHub Copilot CLI** — reuses Claude Code's plugin format, so the same manifests serve both. Just a different binary:
+```bash
+copilot plugin marketplace add waelmas/codeplow
+copilot plugin install obsidian-kb@codeplow
+```
+
 **Cursor**
 ```bash
 git clone https://github.com/waelmas/codeplow ~/codeplow
 mkdir -p ~/.cursor/plugins/local
 ln -s ~/codeplow/obsidian-kb ~/.cursor/plugins/local/obsidian-kb
-# Then: Developer: Reload Window in Cursor
+# Then in Cursor: Command Palette → Developer: Reload Window
 ```
 
 **Codex CLI**
@@ -76,24 +95,33 @@ ln -s ~/codeplow/obsidian-kb ~/.cursor/plugins/local/obsidian-kb
 git clone https://github.com/waelmas/codeplow ~/codeplow
 mkdir -p ~/.agents/plugins
 cp ~/codeplow/.agents/plugins/marketplace.json ~/.agents/plugins/marketplace.json
-# Then open /plugins in Codex
+# Then start Codex and open /plugins from inside its session
 ```
+
+Once any of those finish, reload the agent so it picks up the plugin:
+
+- **Claude Code** — inside your chat, run `/reload-plugins`. If that's unavailable, close Claude Code and reopen it.
+- **Copilot CLI** — start a fresh Copilot session (close and reopen).
+- **Cursor** — Command Palette → *Developer: Reload Window*.
+- **Codex CLI** — start a fresh Codex session, then open `/plugins` inside it to verify.
+
+You're done in your terminal — everything from here happens **inside the agent**.
 
 ---
 
-## Getting started — your first 5 minutes
+### 2. Use — inside your AI agent's chat / session
 
-After install, point your AI agent at a real project and:
+Open Claude Code (or Copilot CLI / Cursor agent chat / Codex), point it at a real project, and type the slash commands below **to the agent**, not into your shell. If you paste `/kb-init` into bash, bash will complain — it's not a shell command.
 
-1. **Run `/kb-init`.** Agent scaffolds a vault (e.g. `./myproject-kb/`), dispatches parallel subagents to write Architecture / Tech Stack / Patterns notes, and runs a Documentation Audit against your existing markdown. 3–6 minutes end to end.
+1. **Type `/kb-init` in your agent.** The agent scaffolds a vault (e.g. `./myproject-kb/`), dispatches parallel subagents to write Architecture / Tech Stack / Patterns notes, and runs a Documentation Audit against your existing markdown. 3–6 minutes end to end.
 
-2. **Open `Research/Documentation Audit.md`.** Every stale claim in your project's docs, with `file:line` evidence. If your project has AI-generated docs, expect surprises. Tell the agent *"fix the stale claims in README.md"* — it works from the evidence, not vibes.
+2. **Open `Research/Documentation Audit.md`** (outside the agent — in Obsidian or any editor). Every stale claim in your project's docs, with `file:line` evidence. If your project has AI-generated docs, expect surprises. Then back in the agent, tell it *"fix the stale claims in README.md"* — it works from the evidence, not vibes.
 
-3. **Run `/kb-graph`.** Opens the vault in Obsidian's graph view; click through the wiki-linked notes to see your project as a knowledge map.
+3. **Type `/kb-graph` in the agent.** Opens the vault in Obsidian's graph view; click through the wiki-linked notes to see your project as a knowledge map.
 
-4. **Try the daily loop.** At session end: `/kb-update` to refresh KB notes with what changed, then `/kb-offboard` (or `/kb-handoff`) to write the handoff. Start a fresh session and `/kb-onboard` — new agent reads the handoff plus the updated KB, picks up with clean context. **This is the loop most users run daily.**
+4. **The daily loop — all typed to the agent.** At session end: `/kb-update` to refresh KB notes with what changed, then `/kb-offboard` (or `/kb-handoff`) to write the handoff. Start a fresh session and `/kb-onboard` — new agent reads the handoff plus the updated KB, picks up with clean context. **This is the loop most users run daily.**
 
-From there: `/kb-update` + `/kb-offboard` at session end, `/kb-onboard` at session start, `/kb-audit` whenever you want a fresh drift check on project docs.
+> **Not seeing slash-command autocomplete?** You probably still need to reload the agent from step 1 — in Claude Code try `/reload-plugins` first, otherwise close and reopen. On Codex CLI there's no slash-command UI — just say *"run kb-init"* or *"catch me up on this project"* and the skill triggers from intent.
 
 ---
 

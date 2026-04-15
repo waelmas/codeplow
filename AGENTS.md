@@ -4,9 +4,10 @@ This file gives AI coding agents (Claude Code, Cursor, Codex, etc.) the context 
 
 ## What this repo is
 
-codeplow is a **plugin marketplace** for AI coding agents. It bundles installable plugins (currently one: `obsidian-kb`) with native support for three platforms:
+codeplow is a **plugin marketplace** for AI coding agents. It bundles installable plugins (currently one: `obsidian-kb`) with native support for four platforms:
 
 - Claude Code (`.claude-plugin/`)
+- GitHub Copilot CLI — **reuses Claude Code's manifests**. Same `.claude-plugin/marketplace.json` + `.claude-plugin/plugin.json`, same `marketplace add` / `plugin install` command shape; only the binary name differs (`copilot` vs `claude`). No separate `.copilot-plugin/` directory. Runtime distinction is the `COPILOT_CLI=1` env var, which any future hooks can branch on to adapt output format.
 - Cursor (`.cursor-plugin/`)
 - Codex CLI (`.codex-plugin/` + `.agents/plugins/`)
 
@@ -66,20 +67,25 @@ Every plugin ships `.claude-plugin/plugin.json`, `.cursor-plugin/plugin.json`, a
 
 `.claude-plugin/marketplace.json`, `.cursor-plugin/marketplace.json`, and `.agents/plugins/marketplace.json`. When adding a new plugin to the marketplace, update all three.
 
-### Version bumps happen in 7 places
+### Version bumps are scripted
 
-A single version bump touches: 3 marketplace manifests + 3 plugin manifests (per plugin) + `scripts/install.sh`. Use `sed` to update them together:
+Version strings live in 6 JSON manifests (3 marketplaces + 3 plugin manifests per plugin) plus two string-literal embeds in `scripts/install.sh` and `scripts/install.ps1` (and the same literal appears in `INSTALL.md`'s Codex example).
+
+**Use the bump script.** `scripts/bump-version.sh` reads `.version-bump.json` (declares all JSON files + their version field path) and bumps atomically:
 
 ```bash
-sed -i '' 's/"version": "OLD"/"version": "NEW"/g' \
-  .claude-plugin/marketplace.json \
-  .cursor-plugin/marketplace.json \
-  .agents/plugins/marketplace.json \
-  <plugin-name>/.claude-plugin/plugin.json \
-  <plugin-name>/.cursor-plugin/plugin.json \
-  <plugin-name>/.codex-plugin/plugin.json \
-  scripts/install.sh
+./scripts/bump-version.sh --check        # show all current versions, detect drift
+./scripts/bump-version.sh --audit        # check + grep repo for undeclared embeds
+./scripts/bump-version.sh 0.1.2          # bump all declared files, then auto-audit
 ```
+
+The `--audit` pass is how the two install scripts + the INSTALL.md example stay honest — they aren't JSON, so the bumper can't touch them automatically. After running the bump, apply the one-liner the audit output hands you:
+
+```bash
+sed -i '' 's/"version": "0.1.1"/"version": "0.1.2"/' scripts/install.sh scripts/install.ps1 INSTALL.md
+```
+
+When you add a new version-bearing JSON file (e.g. `gemini-extension.json` for Gemini CLI, or a root `package.json` for OpenCode), add an entry to `.version-bump.json`. When you add a new non-JSON embed that can't be declared, add it to `audit.exclude` only if it genuinely shouldn't be bumped — otherwise leave it undeclared so the audit keeps reminding you.
 
 ## When working in this repo
 

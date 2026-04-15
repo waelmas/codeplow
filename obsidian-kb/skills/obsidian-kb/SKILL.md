@@ -49,7 +49,10 @@ This plugin gives AI coding agents persistent memory across sessions via Obsidia
 ## Platform Notes
 
 - **Claude Code / Cursor**: Users can invoke as slash commands: `/kb-init`, `/kb-scaffold`, `/kb-audit`, `/kb-update`, `/kb-onboard`, `/kb-offboard` (alias `/kb-handoff`), `/kb-graph`
+- **GitHub Copilot CLI**: Same slash commands as Claude Code — Copilot CLI reuses Claude Code's plugin format. See `references/copilot-tools.md` for tool-name mapping (`Bash` → `bash`, `Read` → `view`, `Task` → `task`, etc.).
 - **Codex CLI**: No native slash commands - users type the command-like form (e.g., "/kb-onboard") or express intent naturally ("catch me up on this project"). Both should trigger the matching skill.
+- **Gemini CLI**: No native slash commands and **no subagent support** — `kb-init` and `kb-audit` degrade to single-session execution (serial instead of parallel). Users express intent naturally. See `references/gemini-tools.md` for tool-name mapping.
+- **OpenCode**: No native slash commands. The codeplow OpenCode plugin injects this awareness skill into each session's first user message. Users express intent naturally. See `references/opencode-tools.md` for tool-name mapping.
 
 ## Vault Resolution Algorithm
 

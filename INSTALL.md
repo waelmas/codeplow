@@ -6,7 +6,7 @@
 
 ## What codeplow is
 
-A plugin marketplace for AI coding agents (Claude Code, Cursor, Codex CLI). Today it ships `obsidian-kb`: persistent project memory + a built-in documentation auditor + session handoff and onboarding for agents, powered by Obsidian vaults.
+A plugin marketplace for AI coding agents (Claude Code, GitHub Copilot CLI, Cursor, Codex CLI). Today it ships `obsidian-kb`: persistent project memory + a built-in documentation auditor + session handoff and onboarding for agents, powered by Obsidian vaults.
 
 Repo: https://github.com/waelmas/codeplow
 
@@ -19,9 +19,10 @@ Follow these in order. If any step fails, stop and report the error to the user 
 Check which tools are installed:
 
 ```bash
-command -v claude  && echo "claude-code-present"
-command -v cursor  && echo "cursor-present"
-command -v codex   && echo "codex-present"
+command -v claude   && echo "claude-code-present"
+command -v copilot  && echo "copilot-cli-present"
+command -v cursor   && echo "cursor-present"
+command -v codex    && echo "codex-present"
 ```
 
 Install codeplow for **every tool that is present**. If multiple tools are installed, the user probably uses more than one - install for all.
@@ -89,9 +90,20 @@ Expected success output:
 ✔ Successfully installed plugin: obsidian-kb@codeplow
 ```
 
-Tell the user: **"Restart Claude Code to load the plugin."**
+Tell the user: **"Inside your Claude Code chat, run `/reload-plugins` to pick up codeplow without restarting. If that doesn't work or isn't available in your build, close Claude Code and open it again."**
 
-### Step 4: Install for Cursor
+### Step 4: Install for GitHub Copilot CLI
+
+Only run if Copilot CLI is present. **Copilot CLI reuses Claude Code's plugin format** — same commands, same manifests on our end, different binary.
+
+```bash
+copilot plugin marketplace add waelmas/codeplow
+copilot plugin install obsidian-kb@codeplow
+```
+
+Expected success output is similar to Claude Code's. Tell the user: **"Start a new Copilot session (or run its reload-plugins equivalent if available) to pick up codeplow. Once loaded, slash commands like `/kb-init`, `/kb-onboard`, and `/kb-offboard` are typed inside that session, not in your raw terminal."**
+
+### Step 5: Install for Cursor
 
 Only run if Cursor is present.
 
@@ -107,7 +119,7 @@ ln -sfn "$HOME/.codeplow/obsidian-kb" "$HOME/.cursor/plugins/local/obsidian-kb"
 
 Tell the user: **"In Cursor, open the Command Palette and run 'Developer: Reload Window' to pick up the plugin."**
 
-### Step 5: Install for Codex CLI
+### Step 6: Install for Codex CLI
 
 Only run if Codex is present.
 
@@ -128,7 +140,7 @@ cat > "$HOME/.agents/plugins/marketplace.json" <<EOF
       "name": "obsidian-kb",
       "source": { "source": "local", "path": "$HOME/.codeplow/obsidian-kb" },
       "description": "Persistent project memory for AI agents + documentation auditor - powered by Obsidian vaults",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "category": "Productivity"
     }
   ]
@@ -143,16 +155,21 @@ Tell the user: **"In Codex, open `/plugins` to see and install `obsidian-kb`."**
 For whichever tool you installed, verify it worked:
 
 - **Claude Code:** `claude plugin list | grep obsidian-kb` - should show `obsidian-kb@codeplow  ✔ enabled`
+- **Copilot CLI:** `copilot plugin list | grep obsidian-kb` - should show `obsidian-kb@codeplow` enabled
 - **Cursor:** `ls -la ~/.cursor/plugins/local/obsidian-kb` - should show a symlink
 - **Codex:** `cat ~/.agents/plugins/marketplace.json | grep obsidian-kb` - should show the plugin entry
 
 ## Report back to the user
 
-Once installation is complete, tell the user:
+Once installation is complete, tell the user clearly:
 
-1. Which tool(s) you installed it for
-2. Any required restart / reload actions they need to take
-3. The commands they can now use:
+1. Which tool(s) you installed it for.
+2. Any required restart / reload actions they need to take.
+3. **Where to type the slash commands** — this is the most common point of confusion. Be explicit:
+
+   > "Installation happens in your terminal, but the slash commands below are typed **inside your AI agent's chat / session**, not into your shell. If you paste `/kb-init` into bash, it'll just error out — that's expected. Start or reload the agent, then type them there."
+
+4. The commands they can now use (all typed in the agent, not the terminal):
    - `/kb-init` - **main command.** Initialize the project knowledge base: scaffold vault + analyze codebase + populate with rich docs + audit existing markdown for stale claims
    - `/kb-update` - refresh KB notes after code changes; surgical edits with file:line evidence, flags new concepts as candidates
    - `/kb-audit` - re-runnable audit of the project's own markdown (README, ARCHITECTURE, etc.) against current code
@@ -161,7 +178,9 @@ Once installation is complete, tell the user:
    - `/kb-offboard` (alias `/kb-handoff`) - write an adaptive session handoff into the vault
    - `/kb-graph` - open the vault graph view in Obsidian
 
-Suggest they start with `/kb-init` on a project they care about.
+   Note for Codex CLI users: Codex has no slash-command UI — tell them to say *"run kb-init"* or *"catch me up on this project"* instead; the skill triggers from natural intent.
+
+Suggest they start with `/kb-init` on a project they care about — inside the agent.
 
 ## Troubleshooting
 
@@ -185,4 +204,5 @@ Install for all of them. Users who have both Claude Code and Cursor usually want
 When codeplow releases a new plugin version, users can update with:
 
 - **Claude Code:** `claude plugin update obsidian-kb@codeplow`
+- **Copilot CLI:** `copilot plugin update obsidian-kb@codeplow`
 - **Cursor/Codex:** `cd ~/.codeplow && git pull` (the symlink + local marketplace pick up changes on next reload)

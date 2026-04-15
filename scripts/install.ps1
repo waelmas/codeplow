@@ -61,6 +61,29 @@ if (Get-Command claude -ErrorAction SilentlyContinue) {
     $InstalledAny = $true
 }
 
+# --- GitHub Copilot CLI -----------------------------------------------------
+# Copilot CLI reuses Claude Code's plugin format — same manifests, same commands.
+if (Get-Command copilot -ErrorAction SilentlyContinue) {
+    Write-Heading '→ GitHub Copilot CLI detected'
+    $marketplaces = (copilot plugin marketplace list 2>&1 | Out-String)
+    if ($marketplaces -notmatch [regex]::Escape($MarketplaceName)) {
+        Write-Host '  Registering marketplace...'
+        copilot plugin marketplace add "waelmas/$MarketplaceName"
+    } else {
+        Write-Host "  Marketplace '$MarketplaceName' already registered."
+    }
+    $plugins = (copilot plugin list 2>&1 | Out-String)
+    if ($plugins -match "$PluginName@$MarketplaceName") {
+        Write-Host "  Plugin '$PluginName' already installed - updating..."
+        copilot plugin update "$PluginName@$MarketplaceName" 2>&1 | Out-Null
+    } else {
+        Write-Host "  Installing plugin '$PluginName@$MarketplaceName'..."
+        copilot plugin install "$PluginName@$MarketplaceName"
+    }
+    Write-OK "Copilot CLI install complete - start a new Copilot session to load."
+    $InstalledAny = $true
+}
+
 # --- Cursor -----------------------------------------------------------------
 $CursorExe = Join-Path $env:LOCALAPPDATA 'Programs\cursor\Cursor.exe'
 if ((Get-Command cursor -ErrorAction SilentlyContinue) -or (Test-Path $CursorExe)) {
@@ -120,7 +143,7 @@ if (Get-Command codex -ErrorAction SilentlyContinue) {
       "name": "$PluginName",
       "source": { "source": "local", "path": "$pluginPath" },
       "description": "Project knowledge base lifecycle via Obsidian vaults",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "category": "Productivity"
     }
   ]
@@ -135,7 +158,7 @@ if (Get-Command codex -ErrorAction SilentlyContinue) {
 
 Write-Host ""
 if (-not $InstalledAny) {
-    Write-Warn2 'No supported AI coding tool detected (claude, cursor, or codex).'
+    Write-Warn2 'No supported AI coding tool detected (claude, copilot, cursor, or codex).'
     Write-Warn2 'Install one of them first, then re-run this script.'
     exit 1
 }

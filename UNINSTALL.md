@@ -23,9 +23,10 @@ Detect which tools are present and clean each one up. If a tool isn't installed,
 ### Step 1: Detect present tools
 
 ```bash
-command -v claude  && echo "claude-code-present"
-command -v cursor  && echo "cursor-present"
-command -v codex   && echo "codex-present"
+command -v claude   && echo "claude-code-present"
+command -v copilot  && echo "copilot-cli-present"
+command -v cursor   && echo "cursor-present"
+command -v codex    && echo "codex-present"
 ```
 
 ### Step 2: Claude Code
@@ -40,7 +41,21 @@ claude plugin marketplace list 2>/dev/null | grep -q "codeplow" \
   && claude plugin marketplace remove codeplow
 ```
 
-### Step 3: Cursor
+### Step 3: GitHub Copilot CLI
+
+Copilot CLI reuses Claude Code's plugin format, so the teardown is identical in shape — just a different binary.
+
+```bash
+# Uninstall the plugin (if installed)
+copilot plugin list 2>/dev/null | grep -q "obsidian-kb@codeplow" \
+  && copilot plugin uninstall obsidian-kb@codeplow
+
+# Remove the marketplace (if registered)
+copilot plugin marketplace list 2>/dev/null | grep -q "codeplow" \
+  && copilot plugin marketplace remove codeplow
+```
+
+### Step 4: Cursor
 
 ```bash
 rm -rf "$HOME/.cursor/plugins/local/obsidian-kb"
@@ -48,7 +63,7 @@ rm -rf "$HOME/.cursor/plugins/local/obsidian-kb"
 
 Tell the user: **"Run 'Developer: Reload Window' in Cursor so it drops the plugin from the current session."**
 
-### Step 4: Codex CLI
+### Step 5: Codex CLI
 
 ```bash
 # Remove the plugin symlink
@@ -67,7 +82,7 @@ if [ -f "$MP" ] && grep -q '"codeplow"' "$MP"; then
 fi
 ```
 
-### Step 5: Remove the local cache (optional but recommended)
+### Step 6: Remove the local cache (optional but recommended)
 
 The install script cloned the codeplow repo to `~/.codeplow` as a cache for Cursor/Codex. Safe to remove:
 
@@ -83,6 +98,10 @@ Confirm each tool no longer has codeplow:
 # Claude Code
 claude plugin list 2>/dev/null | grep -i codeplow   # should be empty
 claude plugin marketplace list 2>/dev/null | grep -i codeplow   # should be empty
+
+# Copilot CLI
+copilot plugin list 2>/dev/null | grep -i codeplow   # should be empty
+copilot plugin marketplace list 2>/dev/null | grep -i codeplow   # should be empty
 
 # Cursor
 ls "$HOME/.cursor/plugins/local/obsidian-kb" 2>/dev/null   # should error

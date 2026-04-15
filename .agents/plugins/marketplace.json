@@ -14,7 +14,7 @@
         "path": "./obsidian-kb"
       },
       "description": "Persistent project memory for AI agents + documentation auditor - evidence-based detection of doc rot, powered by Obsidian vaults",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "category": "Productivity"
     }
   ]

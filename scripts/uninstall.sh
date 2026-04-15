@@ -72,6 +72,38 @@ uninstall_claude_code() {
   return 0
 }
 
+# --- GitHub Copilot CLI -------------------------------------------------------
+uninstall_copilot() {
+  if ! command -v copilot >/dev/null 2>&1; then
+    return 1
+  fi
+  bold "→ GitHub Copilot CLI"
+
+  if copilot plugin list 2>/dev/null | grep -q "$PLUGIN_NAME@$MARKETPLACE_NAME"; then
+    info "Uninstalling plugin '$PLUGIN_NAME@$MARKETPLACE_NAME'..."
+    if copilot plugin uninstall "$PLUGIN_NAME@$MARKETPLACE_NAME" >/dev/null 2>&1; then
+      green "  ✓ Plugin uninstalled."
+    else
+      yellow "  ⚠ Could not uninstall plugin automatically. You can remove it via: copilot plugin uninstall $PLUGIN_NAME@$MARKETPLACE_NAME"
+    fi
+  else
+    info "Plugin '$PLUGIN_NAME@$MARKETPLACE_NAME' was not installed - skipping."
+  fi
+
+  if copilot plugin marketplace list 2>/dev/null | grep -q "$MARKETPLACE_NAME"; then
+    info "Removing marketplace '$MARKETPLACE_NAME'..."
+    if copilot plugin marketplace remove "$MARKETPLACE_NAME" >/dev/null 2>&1; then
+      green "  ✓ Marketplace removed."
+    else
+      yellow "  ⚠ Could not remove marketplace automatically. You can remove it via: copilot plugin marketplace remove $MARKETPLACE_NAME"
+    fi
+  else
+    info "Marketplace '$MARKETPLACE_NAME' was not registered - skipping."
+  fi
+
+  return 0
+}
+
 # --- Cursor -------------------------------------------------------------------
 uninstall_cursor() {
   if ! command -v cursor >/dev/null 2>&1 && [ ! -d "/Applications/Cursor.app" ]; then
@@ -134,6 +166,8 @@ uninstall_cache() {
 # --- Run ----------------------------------------------------------------------
 
 if uninstall_claude_code; then REMOVED_ANY=1; fi
+echo ""
+if uninstall_copilot; then REMOVED_ANY=1; fi
 echo ""
 if uninstall_cursor; then REMOVED_ANY=1; fi
 echo ""

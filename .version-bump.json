@@ -1,0 +1,20 @@
+{
+  "files": [
+    { "path": ".claude-plugin/marketplace.json", "field": "plugins.0.version" },
+    { "path": ".cursor-plugin/marketplace.json", "field": "plugins.0.version" },
+    { "path": ".agents/plugins/marketplace.json", "field": "plugins.0.version" },
+    { "path": "obsidian-kb/.claude-plugin/plugin.json", "field": "version" },
+    { "path": "obsidian-kb/.cursor-plugin/plugin.json", "field": "version" },
+    { "path": "obsidian-kb/.codex-plugin/plugin.json", "field": "version" }
+  ],
+  "audit": {
+    "exclude": [
+      "CHANGELOG.md",
+      "AGENTS.md",
+      "node_modules",
+      ".git",
+      ".version-bump.json",
+      "scripts/bump-version.sh"
+    ]
+  }
+}
