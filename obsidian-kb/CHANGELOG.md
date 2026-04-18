@@ -4,6 +4,19 @@ All notable changes to the **`obsidian-kb`** plugin are documented here.
 
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] — 2026-04-19
+
+### Fixed
+- **`/kb-onboard` robustness in non-interactive combined-prompt invocations.** Previously, calling `claude -p "/kb-onboard\n\nThen answer X"` (or equivalent in other CLIs) would terminate the agent's turn in the middle of the skill's preflight ~50% of the time — the agent would acknowledge a background `find` completion and exit without actually presenting the briefing or executing the follow-up instructions. Root cause: background Bash operations inside the skill were confusable with turn-end signals. Fix: added a "Robustness rules" section at the top of `skills/kb-onboard/SKILL.md` mandating foreground-only Bash, explicit combined-prompt continuation, and a deterministic `<!-- kb-onboard:complete -->` HTML-comment completion marker at the end of Step 5. Smoke-tested: fixed skill runs the full flow and answers follow-up Q&A cleanly in a single `-p` call. Surfaced by Bench-E in [codeplow-benchmarks](https://github.com/waelmasri/codeplow-benchmarks) (1/2 kb reps had failed under the old skill).
+
+### Performance
+- **`/kb-onboard` FAST PATH for explicit-vault-path invocations (major speedup on Sonnet / Haiku).** When the user's message specifies a filesystem path to the vault (e.g., `/kb-onboard ... vault is at /path/to/Foo KB`), the skill now skips Steps 0 (preflight), 1 (vault resolution algorithm), and 1b (Vault Access Sequence) entirely. It reads exactly TWO files — the newest in `Sessions/` plus `Index.md` — and emits a one-paragraph terse briefing. Designed to complete in ≤ 4 tool-call turns on smaller models. Benchmark impact (from `codeplow-benchmarks` Phase 2a diagnostic):
+  - **Haiku 200k:** `/kb-onboard` went from **22 turns / 813k input tokens / $0.134** (original) to **7 turns / 315k / $0.064** with the fast path — **52% cheaper** than even the cold arm ($0.133), making onboard strictly better on Haiku.
+  - **Sonnet 200k:** `/kb-onboard` went from **11 turns / 305k / $0.22** to **8 turns / 168k / $0.15** — substantial reduction in skill overhead.
+  - Opus 1M already had the biggest win from the explicit vault path; no further regression observed.
+
+  Root cause: the original skill's Steps 0/1/1b (preflight + resolution + access sequence) were a minimum 4–6 tool-call turns each executed serially. On Opus that overhead got amortized against Opus's naturally-thorough exploration; on Sonnet/Haiku it dominated total cost. The fast path collapses these when the path is known — almost always the case in automated / scripted use.
+
 ## [0.1.2] — 2026-04-16
 
 ### Added

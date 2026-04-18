@@ -140,7 +140,7 @@ cat > "$HOME/.agents/plugins/marketplace.json" <<EOF
       "name": "obsidian-kb",
       "source": { "source": "local", "path": "$HOME/.codeplow/obsidian-kb" },
       "description": "Persistent project memory for AI agents + documentation auditor - powered by Obsidian vaults",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "category": "Productivity"
     }
   ]

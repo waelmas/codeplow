@@ -12,6 +12,31 @@ description: >
 
 Read the latest session handoff and project overview to quickly brief yourself (or the agent) on the current state of the project. Lean and fast - get context, then get to work.
 
+## Robustness rules (read first)
+
+These rules exist because non-interactive invocations (`claude -p "..."`, Copilot CLI `-p`, etc.) can end the agent's turn prematurely in the middle of multi-step skills. Rule #6 is the *performance* rule that matters most on smaller models.
+
+1. **Run every Bash call in this skill in the FOREGROUND.** Never set `run_in_background: true` on any command here. Background completions can be misread as the end of your turn, causing the skill to terminate after preflight. If you need parallelism (e.g., listing + searching), call the commands sequentially instead.
+
+2. **Complete Steps 0–5 before handing back control.** The briefing in Step 4 is NOT an end-of-turn signal. Always produce it, then continue.
+
+3. **If the user's message contained instructions beyond `/kb-onboard`**, e.g. "`/kb-onboard`, then answer these questions" or "`/kb-onboard` and continue the feature" - complete the briefing first, then proceed with those instructions in the SAME turn. Do not stop after the briefing.
+
+4. **If CLI calls (`obsidian vaults`, `obsidian vault info=name`, etc.) fail or return unexpected values**, fall through to filesystem mode immediately (`CLI_MODE=0`). A contested active-vault (from parallel agents or running scripts) is not a reason to abort - it's a reason to switch to `find`/`cat`/`grep` on `$VAULT_PATH` and keep going.
+
+5. **Emit a deterministic completion marker** at the end of Step 5: literally output the line `<!-- kb-onboard:complete -->` on its own line as an HTML comment. This tells both humans and downstream tooling that the skill ran to completion, and lets you confidently move on to any remaining instructions.
+
+6. **FAST PATH when the user provides an explicit vault PATH.** If the user's message specifies a filesystem path to the vault (e.g., "The vault is at `/path/to/Foo KB`" or "use the vault at `~/vaults/Foo`"), you have **everything you need** to skip almost all of this skill. Concretely:
+   - Set `VAULT_PATH=<provided path>`, `CLI_MODE=0`.
+   - **Skip** Step 0 (preflight), Step 1 (resolution algorithm), Step 1b (Vault Access Sequence) entirely. Do NOT run `command -v obsidian`, `obsidian vaults`, or `obsidian vault info=name`.
+   - **Read exactly TWO files and stop**: the newest file in `$VAULT_PATH/Sessions/` (use a single `ls -t Sessions/ | head -1` to pick it), and `$VAULT_PATH/Index.md` (if present; if not, skip). Do NOT enumerate candidate overview filenames. Do NOT run `obsidian search`. Do NOT read any `Architecture/` or other vault subdirectories unless the user explicitly asks a follow-up about them.
+   - **Emit a one-paragraph briefing** (≤ 80 words) capturing TL;DR + Next Steps + one Watch-Out. Do NOT produce the full block-quoted briefing format from Step 4.
+   - Emit `<!-- kb-onboard:complete -->` and continue to any remaining instructions.
+   
+   This fast path is designed to be **≤ 4 tool-call turns total** even on smaller models (Haiku/Sonnet). The full flow's ~10–20 turn overhead only applies when vault resolution actually has to work.
+   
+   Only fall back to the full flow (Steps 0–5) if the provided path doesn't exist or its structure is non-standard.
+
 ## Step 0: Preflight - Obsidian available and running?
 
 Follow the **Preflight Check** in the `obsidian-kb` awareness skill (`${CLAUDE_PLUGIN_ROOT}/skills/obsidian-kb/SKILL.md`). In short:
@@ -189,6 +214,14 @@ Read and briefly summarize any matching notes.
 End the briefing with a reminder that the vault has more depth:
 
 > "The vault has **N** notes you can explore. If you need deeper context on anything, I can search and read from the vault - just ask."
+
+Then emit the completion marker on its own line as an HTML comment (invisible in rendered markdown, still machine-parseable):
+
+```
+<!-- kb-onboard:complete -->
+```
+
+The marker signals "the skill finished normally" to both you (the agent) and any script parsing the output. After emitting it, immediately continue with any remaining instructions in the user's message (see Robustness rule #3).
 
 ## Key Principles
 
